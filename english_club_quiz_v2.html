@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Club — Practice Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F5F2EC;--card:#FFFDF9;--ink:#1A1714;--ink2:#6B6460;--ink3:#A09A96;
+  --accent:#2D6A4F;--accent-light:#D8F3DC;--accent-dark:#1B4332;
+  --danger:#C1121F;--danger-light:#FFE8E8;--warn:#E07B39;--warn-light:#FFF0E4;
+  --border:#E8E2DA;--radius:14px;--shadow:0 2px 12px rgba(26,23,20,.08)
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+.page{max-width:740px;margin:0 auto;padding:2rem 1.5rem 4rem}
+.header{text-align:center;margin-bottom:2.5rem}
+.header-logo{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:.75rem}
+.header h1{font-family:'DM Serif Display',serif;font-size:2.4rem;color:var(--ink);margin-bottom:.4rem}
+.header p{font-size:15px;color:var(--ink2)}
+
+/* Progress */
+.progress-wrap{margin-bottom:1.5rem}
+.progress-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--ink3);margin-bottom:6px}
+.progress-track{height:3px;background:var(--border);border-radius:2px}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease}
+
+/* Timer */
+.timer-wrap{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem}
+.timer-face{width:52px;height:52px;flex-shrink:0;position:relative}
+.timer-face svg{transform:rotate(-90deg)}
+.timer-face .bg{fill:none;stroke:var(--border);stroke-width:4}
+.timer-face .fg{fill:none;stroke:var(--accent);stroke-width:4;stroke-linecap:round;stroke-dasharray:138.2;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear,stroke .3s}
+.timer-face .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--ink)}
+.timer-bar-wrap{flex:1}
+.timer-label{font-size:11px;color:var(--ink3);margin-bottom:4px;letter-spacing:.04em;text-transform:uppercase}
+.timer-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.timer-fill{height:100%;background:var(--accent);border-radius:3px;transition:width 1s linear,background .3s}
+.timer-fill.warn{background:var(--warn)}
+.timer-fill.danger{background:var(--danger)}
+
+/* Card */
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem;box-shadow:var(--shadow)}
+.q-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:1rem}
+.q-badge.mcq{background:#EAF4FF;color:#1A5F9E}
+.q-badge.fill{background:#F0ECFF;color:#5B3FBE}
+.q-badge.match{background:#FFF4E0;color:#A0570A}
+.q-badge.listen{background:var(--accent-light);color:var(--accent-dark)}
+.q-badge.truefalse{background:#FDE8F0;color:#9B1D60}
+.q-text{font-family:'DM Serif Display',serif;font-size:1.2rem;line-height:1.55;color:var(--ink);margin-bottom:1.25rem}
+
+/* Listen */
+.listen-block{background:var(--accent-light);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:12px}
+.play-btn{width:44px;height:44px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;color:white;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s,background .15s}
+.play-btn:hover{transform:scale(1.05);background:var(--accent-dark)}
+.listen-info .listen-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-dark)}
+.listen-info .listen-hint{font-size:13px;color:var(--accent-dark);opacity:.8;margin-top:2px}
+
+/* Options */
+.options{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;background:transparent;text-align:left;width:100%;font-size:14px;color:var(--ink);transition:all .15s;font-family:'DM Sans',sans-serif;line-height:1.5}
+.opt:hover:not(:disabled){border-color:var(--accent);background:var(--accent-light)}
+.opt-letter{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;color:var(--ink3);transition:all .15s}
+.opt:hover:not(:disabled) .opt-letter{border-color:var(--accent);color:var(--accent)}
+.opt.correct{border-color:var(--accent)!important;background:var(--accent-light)!important}
+.opt.correct .opt-letter{background:var(--accent);border-color:var(--accent);color:white}
+.opt.wrong{border-color:var(--danger)!important;background:var(--danger-light)!important}
+.opt.wrong .opt-letter{background:var(--danger);border-color:var(--danger);color:white}
+.opt.reveal{border-color:var(--accent)!important;background:var(--accent-light)!important;opacity:.65}
+.opt.reveal .opt-letter{background:var(--accent);border-color:var(--accent);color:white}
+
+/* Fill */
+.fill-wrap{display:flex;gap:8px;margin-bottom:10px}
+.fill-wrap input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--ink);background:white;outline:none;transition:border-color .15s}
+.fill-wrap input:focus{border-color:var(--accent)}
+.fill-wrap input.correct{border-color:var(--accent);background:var(--accent-light)}
+.fill-wrap input.wrong{border-color:var(--danger);background:var(--danger-light)}
+.check-btn{padding:10px 18px;background:var(--ink);color:white;border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
+
+/* Match */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.match-col{display:flex;flex-direction:column;gap:6px}
+.match-item{padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;cursor:pointer;background:white;color:var(--ink);transition:all .15s;line-height:1.4}
+.match-item:hover{border-color:var(--accent)}
+.match-item.selected{border-color:var(--accent);background:var(--accent-light);color:var(--accent-dark)}
+.match-item.matched{background:var(--accent-light);border-color:var(--accent);color:var(--accent-dark);cursor:default}
+.match-item.wrong-sel{border-color:var(--danger);background:var(--danger-light)}
+
+/* Explanation */
+.explanation{margin-top:1rem;padding:1rem 1.25rem;border-radius:10px;border-left:3px solid;font-size:13px;line-height:1.6;display:none}
+.explanation.correct{background:var(--accent-light);border-color:var(--accent);color:var(--accent-dark)}
+.explanation.wrong{background:var(--danger-light);border-color:var(--danger);color:var(--danger)}
+.explanation.timeout{background:var(--warn-light);border-color:var(--warn);color:#7C3A0A}
+
+/* Nav */
+.nav-row{display:flex;justify-content:flex-end;margin-top:1.25rem}
+.next-btn{padding:11px 24px;background:var(--ink);color:white;border:none;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;display:none}
+
+/* Score */
+.score-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:var(--shadow)}
+.score-header{text-align:center;margin-bottom:2rem}
+.score-big{font-family:'DM Serif Display',serif;font-size:5rem;color:var(--ink);line-height:1}
+.score-pct{font-size:14px;color:var(--ink2);margin-top:.25rem}
+.score-bar{height:8px;background:var(--border);border-radius:4px;margin:1.25rem 0;overflow:hidden}
+.score-fill{height:100%;border-radius:4px;transition:width 1s ease}
+.compare-block{background:var(--bg);border-radius:10px;padding:1.25rem;margin:1.5rem 0;display:none}
+.compare-block h3{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:1rem}
+.compare-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.compare-item{text-align:center;padding:.75rem;background:var(--card);border-radius:8px;border:1px solid var(--border)}
+.compare-item .ci-label{font-size:11px;color:var(--ink3);margin-bottom:4px}
+.compare-item .ci-val{font-family:'DM Serif Display',serif;font-size:1.8rem;color:var(--ink)}
+.compare-item .ci-sub{font-size:12px;color:var(--ink3)}
+.compare-item.better .ci-val{color:var(--accent)}
+.compare-item.worse .ci-val{color:var(--danger)}
+.score-actions{display:flex;gap:10px;justify-content:center;margin-top:1.5rem;flex-wrap:wrap}
+.btn-primary{padding:11px 24px;background:var(--ink);color:white;border:none;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-secondary{padding:11px 24px;background:transparent;color:var(--ink);border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif}
+
+/* Review */
+.review-section{margin-top:2rem}
+.review-section h3{font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:1rem;color:var(--ink)}
+.review-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:.75rem;box-shadow:var(--shadow)}
+.review-item .ri-meta{display:flex;align-items:center;gap:8px;margin-bottom:.75rem}
+.ri-status{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.ri-status.correct{background:var(--accent);color:white}
+.ri-status.wrong{background:var(--danger);color:white}
+.ri-status.timeout{background:var(--warn);color:white}
+.ri-qnum{font-size:12px;color:var(--ink3)}
+.ri-lesson{font-size:11px;padding:2px 8px;border-radius:20px;background:var(--bg);color:var(--ink3)}
+.ri-q{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:.6rem;line-height:1.5}
+.ri-answer{font-size:13px;color:var(--ink2);margin-bottom:.5rem}
+.ri-explain{font-size:13px;color:var(--ink2);padding:.75rem 1rem;background:var(--bg);border-radius:8px;border-left:3px solid var(--border);line-height:1.6}
+.ri-explain.correct{border-color:var(--accent);background:var(--accent-light);color:var(--accent-dark)}
+.ri-explain.wrong{border-color:var(--danger);background:var(--danger-light);color:var(--danger)}
+
+/* Name entry */
+.name-wrap{text-align:center;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:var(--shadow)}
+.name-wrap h2{font-family:'DM Serif Display',serif;font-size:1.8rem;margin-bottom:.5rem}
+.name-wrap p{color:var(--ink2);font-size:14px;margin-bottom:1.5rem}
+.name-input-row{display:flex;gap:8px;max-width:360px;margin:0 auto}
+.name-input{flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--ink);background:white;outline:none;transition:border-color .15s}
+.name-input:focus{border-color:var(--accent)}
+.name-btn{padding:12px 20px;background:var(--accent);color:white;border:none;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.name-error{color:var(--danger);font-size:13px;margin-top:.5rem;text-align:center}
+
+/* Start */
+.start-wrap{text-align:center;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:var(--shadow)}
+.start-wrap h2{font-family:'DM Serif Display',serif;font-size:1.8rem;margin-bottom:.75rem}
+.start-wrap p{color:var(--ink2);font-size:14px;margin-bottom:.5rem}
+.feature-list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:1.25rem 0 1.75rem}
+.feature-tag{padding:5px 14px;background:var(--bg);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--ink2)}
+.start-btn{padding:13px 32px;background:var(--accent);color:white;border:none;border-radius:10px;font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif}
+.welcome-name{font-weight:600;color:var(--accent)}
+
+/* Admin Dashboard */
+.admin-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;box-shadow:var(--shadow)}
+.admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:10px}
+.admin-header h2{font-family:'DM Serif Display',serif;font-size:1.6rem;color:var(--ink)}
+.admin-badge{background:var(--accent-light);color:var(--accent-dark);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px}
+.admin-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem}
+.stat-box{background:var(--bg);border-radius:10px;padding:1rem;text-align:center;border:1px solid var(--border)}
+.stat-val{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--ink);line-height:1}
+.stat-label{font-size:11px;color:var(--ink3);margin-top:4px;text-transform:uppercase;letter-spacing:.06em}
+.admin-table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
+.admin-table{width:100%;border-collapse:collapse;font-size:13px}
+.admin-table th{background:var(--bg);padding:10px 14px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);border-bottom:1px solid var(--border)}
+.admin-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--ink);vertical-align:middle}
+.admin-table tr:last-child td{border-bottom:none}
+.admin-table tr:hover td{background:var(--bg)}
+.score-pill{display:inline-block;padding:2px 8px;border-radius:20px;font-weight:600;font-size:12px}
+.score-pill.high{background:var(--accent-light);color:var(--accent-dark)}
+.score-pill.mid{background:var(--warn-light);color:#7C3A0A}
+.score-pill.low{background:var(--danger-light);color:var(--danger)}
+.topic-pills{display:flex;flex-wrap:wrap;gap:4px}
+.topic-pill{padding:2px 7px;background:#EAF4FF;color:#1A5F9E;border-radius:12px;font-size:11px}
+.admin-empty{text-align:center;padding:2rem;color:var(--ink3);font-size:14px}
+.admin-logout{padding:8px 16px;background:transparent;color:var(--ink3);border:1.5px solid var(--border);border-radius:8px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.expand-btn{background:none;border:none;cursor:pointer;color:var(--accent);font-size:12px;padding:0;font-family:'DM Sans',sans-serif;text-decoration:underline}
+.detail-row{display:none;background:var(--bg)}
+.detail-row td{padding:10px 14px}
+.detail-attempts{display:flex;flex-direction:column;gap:6px}
+.attempt-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--ink2);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.attempt-item strong{color:var(--ink)}
+.attempt-date{font-size:11px;color:var(--ink3);margin-left:6px}
+
+/* Detail panel layout */
+.detail-inner{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:4px 0 8px}
+@media(max-width:600px){.detail-inner{grid-template-columns:1fr}}
+.detail-col{}
+.detail-section-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);margin-bottom:8px}
+
+/* Question analysis */
+.qa-section-title{font-size:12px;font-weight:600;margin:10px 0 6px;padding:4px 0;border-bottom:1px solid var(--border)}
+.qa-section-title.qa-danger{color:var(--danger)}
+.qa-section-title.qa-warn{color:var(--warn)}
+.qa-section-title.qa-ok{color:var(--accent)}
+.qa-item{border-radius:8px;padding:8px 10px;margin-bottom:5px;font-size:12px}
+.qa-item-danger{background:var(--danger-light);border:1px solid #f5c6c6}
+.qa-item-warn{background:var(--warn-light);border:1px solid #f5d9c0}
+.qa-item-ok{background:var(--accent-light);border:1px solid #b7e4c7}
+.qa-meta{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.qa-lesson{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1px 7px;font-size:10px;color:var(--ink3)}
+.qa-fails{font-size:11px;font-weight:600;color:var(--danger)}
+.qa-q{color:var(--ink);line-height:1.4;font-size:12px}
+.qa-dots{display:flex;gap:3px;margin-top:5px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.dot-ok{background:var(--accent)}
+.dot-fail{background:var(--danger)}
+
+/* Wrong answer breakdown */
+.qa-wrong-list{margin-top:7px;display:flex;flex-direction:column;gap:4px}
+.qa-wrong-row{display:flex;flex-wrap:wrap;align-items:center;gap:5px;font-size:11px;background:rgba(255,255,255,.6);border-radius:6px;padding:4px 8px}
+.qa-wrong-attempt{color:var(--ink3);font-weight:600;flex-shrink:0}
+.qa-chosen{color:var(--ink)}
+.qa-chosen strong{color:var(--danger)}
+.qa-correct-ans{color:var(--accent);font-weight:600;margin-left:2px}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="header-logo">AlphaSphere · English Club</div>
+    <h1>Practice Quiz</h1>
+    <p>Review all lessons · Build your confidence</p>
+  </div>
+  <div id="app"></div>
+</div>
+<script>
+// ─── CONFIG ───────────────────────────────────────────
+const TIMER_SEC = 120;
+const ADMIN_NAME = 'Hazel_Admin';
+const letters = ['A','B','C','D'];
+const speechSynth = window.speechSynthesis;
+
+// ─── STATE ────────────────────────────────────────────
+let current = 0, score = 0, timerInterval = null, timeLeft = TIMER_SEC;
+let answered = false;
+let matchState = {selected:null,side:null,matched:[]};
+let results = [];
+let currentUser = null;
+let attemptNum = 1;
+
+// ─── STORAGE HELPERS ──────────────────────────────────
+function storageKey(name){ return 'ec_quiz_' + name.trim().toLowerCase(); }
+
+function loadUserData(name){
+  try {
+    const raw = localStorage.getItem(storageKey(name));
+    return raw ? JSON.parse(raw) : { name, attempts:[] };
+  } catch(e){ return { name, attempts:[] }; }
+}
+
+function saveAttempt(name, attemptData){
+  const data = loadUserData(name);
+  data.attempts.push(attemptData);
+  try { localStorage.setItem(storageKey(name), JSON.stringify(data)); } catch(e){}
+}
+
+function getAllUsers(){
+  const users = [];
+  for(let i=0; i<localStorage.length; i++){
+    const key = localStorage.key(i);
+    if(key && key.startsWith('ec_quiz_')){
+      try {
+        const data = JSON.parse(localStorage.getItem(key));
+        if(data && data.name && data.name.toLowerCase() !== ADMIN_NAME.toLowerCase()) users.push(data);
+      } catch(e){}
+    }
+  }
+  return users.sort((a,b)=>{
+    const la = a.attempts[a.attempts.length-1]?.date || '';
+    const lb = b.attempts[b.attempts.length-1]?.date || '';
+    return lb.localeCompare(la);
+  });
+}
+
+// ─── QUESTIONS ────────────────────────────────────────
+const questions = [
+  // WORKPLACE
+  {type:'mcq',topic:'Multiple choice',lesson:'Workplace',
+   q:'Which sentence correctly uses "be equipped with"?',
+   options:['Our office is equipped with air conditioners and a microwave.','Our office is placing with a coffee machine.','Our office is located with desks.','Our office is equipped to a refrigerator.'],
+   answer:0,explain:'"Be equipped with" means the place has these items installed. Correct: "Our office is equipped with air conditioners and a microwave."'},
+  {type:'mcq',topic:'Multiple choice',lesson:'Workplace',
+   q:'The coffee machine is ______ near the entrance.',
+   options:['located','equipped','placed','found'],
+   answer:2,explain:'"Be placed" is used to describe where an object has been put. "Located" is also possible but "placed" matches the lesson pattern for movable items.'},
+  {type:'fill',topic:'Fill in the blank',lesson:'Workplace',
+   q:'Complete: "You can find a price tag on ______ product." (every/each)',
+   answer:'every',explain:'"Every" is used before singular nouns to mean all items in a group. "You can find a price tag on every product."'},
+  {type:'listen',topic:'Listening',lesson:'Workplace',
+   q:'Listen and choose the correct description of the office.',
+   audio:'Our office is equipped with air conditioners and a microwave. There are several desks and monitors. The coffee machine is placed near the entrance.',
+   audioLabel:'Office description — click ▶ to listen',
+   options:['The office has a microwave but no air conditioner.','The coffee machine is located in the main hall.','The office is equipped with air conditioners and a microwave.','The office has monitors but no desks.'],
+   answer:2,explain:'The audio says "Our office is equipped with air conditioners and a microwave" — this matches option C.'},
+  {type:'truefalse',topic:'True or False',lesson:'Workplace',
+   q:'"The machine is located in the main hall." — Is this sentence grammatically correct?',
+   options:['True — the sentence is correct.','False — it should be "The machine locates in the main hall."'],
+   answer:0,explain:'"Be located in" is the correct passive structure for describing where something is. "The machine is located in the main hall." is perfectly correct.'},
+
+  // PROBLEMS
+  {type:'mcq',topic:'Multiple choice',lesson:'Problems',
+   q:'"There\'s no internet." — What type of problem is this?',
+   options:['Facility issue','Technology problem','Office supplies problem','Document problem'],
+   answer:1,explain:'Internet issues are classified as "technology problems" — one of the four problem categories from the lesson.'},
+  {type:'mcq',topic:'Multiple choice',lesson:'Problems',
+   q:'"The invoice isn\'t in the box." — What type of problem is this?',
+   options:['Technology problem','Facility issue','Document problem','Office supplies problem'],
+   answer:2,explain:'An invoice is a document, so a missing invoice is a "document problem."'},
+  {type:'listen',topic:'Listening',lesson:'Problems',
+   q:'Listen and identify what problem is being described.',
+   audio:'I have a problem. The air conditioner does not work. It has been broken since this morning. Can someone help?',
+   audioLabel:'Office problem — click ▶ to listen',
+   options:['Technology problem — the internet is down.','Document problem — a file is missing.','Facility issue — the air conditioner is broken.','Office supplies problem — no paper.'],
+   answer:2,explain:'The audio mentions "the air conditioner does not work" and "it\'s broken" — air conditioners are part of the office facility, so this is a "facility issue."'},
+  {type:'fill',topic:'Fill in the blank',lesson:'Problems',
+   q:'Complete the sentence: "There\'s no ______ for the printer."',
+   answer:'paper',explain:'From the lesson: "There\'s no paper for the printer." — a classic office supplies problem.'},
+  {type:'truefalse',topic:'True or False',lesson:'Problems',
+   q:'"It\'s broken" can be used to describe a technology problem.',
+   options:['True — "It\'s broken" works for any broken item, including tech.','False — "It\'s broken" can only describe facility issues.'],
+   answer:0,explain:'"It\'s broken" is a general phrase that can be used for any broken item — a computer, printer, machine, or facility equipment.'},
+
+  // PERSONALITY
+  {type:'mcq',topic:'Multiple choice',lesson:'Personality',
+   q:'Choose the correct sentence to describe a person with lots of new ideas.',
+   options:['He is very impatient.','She is very forgetful.','He/She is very creative.','He is very shy.'],
+   answer:2,explain:'"Creative" means having many new ideas and being imaginative. "He/She is very creative" is the correct answer.'},
+  {type:'fill',topic:'Fill in the blank',lesson:'Personality',
+   q:'She never remembers where she puts her keys. She is very ______.',
+   answer:'forgetful',explain:'"Forgetful" means someone who often forgets things. It is one of the core personality adjectives from the lesson.'},
+  {type:'mcq',topic:'Multiple choice',lesson:'Personality',
+   q:'Which question asks about someone\'s personality?',
+   options:['Where do you work?','How would you describe him?','What time do you start work?','How much do you earn?'],
+   answer:1,explain:'"How would you describe him/her?" is one of the key questions used to ask about personality from the lesson.'},
+  {type:'listen',topic:'Listening',lesson:'Personality',
+   q:'Listen and identify the personality being described.',
+   audio:'She talks to everyone at the office, always smiling and making new friends. She loves meeting new people.',
+   audioLabel:'Personality description — click ▶ to listen',
+   options:['shy','forgetful','outgoing','impatient'],
+   answer:2,explain:'"Outgoing" means sociable and friendly — someone who loves talking to and meeting people. The description matches "outgoing" perfectly.'},
+  {type:'match',topic:'Matching',lesson:'Personality',
+   q:'Match each description to the correct personality adjective.',
+   pairs:[
+     {left:'Gets frustrated when things take too long.',right:'impatient'},
+     {left:'Believes in themselves and their abilities.',right:'confident'},
+     {left:'Always has new and original ideas.',right:'creative'},
+     {left:'Often loses things or forgets appointments.',right:'forgetful'}
+   ],explain:'impatient = gets frustrated by delays | confident = believes in oneself | creative = new ideas | forgetful = often forgets things.'},
+  {type:'truefalse',topic:'True or False',lesson:'Personality',
+   q:'"Not really. In fact, I can be very impatient." — This sentence is used to agree with a positive statement.',
+   options:['True — "Not really" is used to agree.','False — "Not really" is used to partially disagree or correct a statement.'],
+   answer:1,explain:'"Not really" is used to disagree or give a negative answer. In this case, the speaker is saying they are NOT patient — they are actually impatient.'},
+
+  // JOBS
+  {type:'mcq',topic:'Multiple choice',lesson:'Jobs',
+   q:'"I often have a heavy workload." — Is this a pro or a con?',
+   options:['Pro — it means you are very productive.','Con — it can be stressful and tiring.','Neither — it is neutral.','Pro — it means you earn more money.'],
+   answer:1,explain:'A heavy workload means a lot of work, which is generally a con (disadvantage) because it can cause stress. From the lesson: "I often have a heavy workload" = con.'},
+  {type:'fill',topic:'Fill in the blank',lesson:'Jobs',
+   q:'Complete: "I work in a ______ environment." (means formal and high-quality)',
+   answer:'professional',explain:'"Professional environment" is a pro of a job — it means the workplace is organized, formal, and high-quality.'},
+  {type:'listen',topic:'Listening',lesson:'Jobs',
+   q:'Listen and decide if the person is describing a pro or a con.',
+   audio:'I have a stable job and I can make good money. I work in a professional environment, which I really enjoy.',
+   audioLabel:'Job description — click ▶ to listen',
+   options:['The person is describing pros of their job.','The person is describing cons of their job.','The person is describing both pros and cons.','The person is describing a facility issue.'],
+   answer:0,explain:'All three statements — "stable job", "make good money", "professional environment" — are listed as PROS (advantages) in the Jobs lesson.'},
+  {type:'mcq',topic:'Multiple choice',lesson:'Jobs',
+   q:'Which of the following is a PRO of a job from the lesson?',
+   options:['Heavy workload','Works on weekends','High pressure','Stable job'],
+   answer:3,explain:'"Stable job" is listed as a pro. "Heavy workload", "works on weekends", and "high pressure" are all cons from the lesson.'},
+  {type:'truefalse',topic:'True or False',lesson:'Jobs',
+   q:'"The job can be very high-pressure." — This sentence describes a disadvantage of the job.',
+   options:['True — high pressure is a con.','False — high pressure is a pro.'],
+   answer:0,explain:'"High pressure" is listed as a con (disadvantage) in the Jobs lesson. It means the job involves a lot of stress and demands.'},
+
+  // CONVERSATIONS
+  {type:'mcq',topic:'Multiple choice',lesson:'Conversations',
+   q:'Which phrase is used to START a conversation?',
+   options:['I\'ve got to run. Nice talking to you.','Listen, I\'d better get going.','Hi. How\'s it going?','Well, I need to go. Have a nice day.'],
+   answer:2,explain:'"Hi. How\'s it going?" is a greeting used to start a conversation. The other options are all phrases used to CLOSE a conversation.'},
+  {type:'listen',topic:'Listening',lesson:'Conversations',
+   q:'Listen to the dialogue. What is happening?',
+   audio:'Nice day, is not it? Do you like music? Are you from Vietnam? Were you at the concert last night?',
+   audioLabel:'Conversation — click ▶ to listen',
+   options:['The person is closing a conversation.','The person is making small talk.','The person is describing a problem.','The person is talking about their job.'],
+   answer:1,explain:'Small talk uses light topics like the weather ("Nice day, isn\'t it?"), hobbies, and recent events. All four questions in the audio are classic small talk examples.'},
+  {type:'fill',topic:'Fill in the blank',lesson:'Conversations',
+   q:'Complete the closing phrase: "I\'ve got to run. ______ talking to you."',
+   answer:'nice',explain:'The full phrase is "I\'ve got to run. Nice talking to you." — a polite way to end a conversation.'},
+  {type:'match',topic:'Matching',lesson:'Conversations',
+   q:'Match each phrase to the correct conversation stage.',
+   pairs:[
+     {left:'"Hi. How\'s it going?"',right:'Starting a conversation'},
+     {left:'"Nice day, isn\'t it?"',right:'Small talk (weather)'},
+     {left:'"I\'d better get going."',right:'Closing a conversation'},
+     {left:'"Were you at the concert?"',right:'Small talk (events)'}
+   ],explain:'Starting: greetings like "Hi, how\'s it going?" | Small talk: light topics like weather and events | Closing: phrases like "I\'d better get going."'},
+
+  // EXTRA
+  {type:'fill',topic:'Fill in the blank',lesson:'Personality',
+   q:'He loves chatting with new people and is always the first to say hello. He is very ______.',
+   answer:'outgoing',explain:'"Outgoing" describes someone who is sociable and enjoys meeting and talking to people.'},
+  {type:'truefalse',topic:'True or False',lesson:'Jobs',
+   q:'"I have a stable job." — This is describing a disadvantage of the job.',
+   options:['True — a stable job is a con.','False — a stable job is a pro.'],
+   answer:1,explain:'A "stable job" means the job is secure and reliable, which is a PRO (advantage) from the Jobs lesson.'},
+  {type:'mcq',topic:'Multiple choice',lesson:'Conversations',
+   q:'You want to end a conversation politely. Which phrase do you use?',
+   options:['Hi. How\'s it going?','Nice day, isn\'t it?','It\'s been nice talking to you.','Do you like music?'],
+   answer:2,explain:'"It\'s been nice talking to you" is a polite closing phrase. The other options are for starting or making small talk.'},
+  {type:'listen',topic:'Listening',lesson:'Problems',
+   q:'Listen and choose what kind of problem is described.',
+   audio:'I cannot print anything. There is no paper left for the printer. Can someone check the supply room?',
+   audioLabel:'Office problem — click ▶ to listen',
+   options:['Technology problem','Facility issue','Office supplies problem','Document problem'],
+   answer:2,explain:'"No paper for the printer" is an office supplies problem — you\'ve run out of a consumable supply item.'},
+  {type:'truefalse',topic:'True or False',lesson:'Conversations',
+   q:'"Well, I need to go. Have a nice day." — This is an example of a closing phrase.',
+   options:['True — this is used to end a conversation politely.','False — this is used to start a conversation.'],
+   answer:0,explain:'"Well, I need to go. Have a nice day." is listed in the lesson as a closing phrase — it signals that you are about to leave the conversation.'}
+];
+
+// ─── SPEECH (louder, safe text passing) ───────────────
+let currentAudioText = '';
+let isSpeaking = false;
+
+function stopSpeech(){
+  speechSynth.cancel();
+  isSpeaking = false;
+  const b=document.getElementById('play-btn');
+  if(b){b.textContent='▶';b.classList.remove('playing')}
+}
+
+function togglePlay(){
+  if(isSpeaking){ stopSpeech(); return; }
+  speak(currentAudioText);
+}
+
+function speak(text){
+  stopSpeech();
+  if(!text) return;
+  const b=document.getElementById('play-btn');
+  const u=new SpeechSynthesisUtterance(text);
+  u.rate=0.85;
+  u.lang='en-US';
+  u.onstart=()=>{isSpeaking=true; if(b){b.textContent='⏸';b.classList.add('playing')}};
+  u.onend=u.onerror=()=>{isSpeaking=false; if(b){b.textContent='▶';b.classList.remove('playing')}};
+  speechSynth.speak(u);
+}
+
+// ─── TIMER ────────────────────────────────────────────
+function startTimer(){
+  clearInterval(timerInterval);timeLeft=TIMER_SEC;updateTimer();
+  timerInterval=setInterval(()=>{timeLeft--;updateTimer();if(timeLeft<=0){clearInterval(timerInterval);timeUp()}},1000)
+}
+function updateTimer(){
+  const fill=document.getElementById('timer-fill');
+  const face=document.getElementById('timer-fg');
+  const num=document.getElementById('timer-num');
+  if(!fill||!face||!num)return;
+  const pct=timeLeft/TIMER_SEC;
+  fill.style.width=(pct*100)+'%';
+  fill.className='timer-fill'+(timeLeft<=10?' danger':timeLeft<=20?' warn':'');
+  face.style.stroke=timeLeft<=10?'var(--danger)':timeLeft<=20?'var(--warn)':'var(--accent)';
+  const circum=138.2;face.style.strokeDashoffset=circum*(1-pct);
+  const m=Math.floor(timeLeft/60),s=timeLeft%60;
+  num.textContent=m+':'+(s<10?'0':'')+s;
+}
+function timeUp(){
+  if(answered)return;answered=true;stopSpeech();
+  const q=questions[current];
+  if(q.type==='mcq'||q.type==='listen'||q.type==='truefalse'){
+    document.querySelectorAll('.opt').forEach((b,i)=>{b.disabled=true;if(i===q.answer)b.classList.add('reveal')})
+  }else if(q.type==='fill'){const inp=document.getElementById('fill-inp');if(inp)inp.disabled=true}
+  showExplain('timeout',q);
+  results.push({q,userAnswer:null,correct:false,timeout:true});
+  document.getElementById('next-btn').style.display='block'
+}
+function showExplain(status,q){
+  const ex=document.getElementById('explanation');if(!ex)return;
+  ex.className='explanation '+status;
+  const prefix=status==='correct'?'<strong>✓ Correct!</strong> ':status==='timeout'?'<strong>⏱ Time\'s up!</strong> ':'<strong>✗ Not quite.</strong> ';
+  ex.innerHTML=prefix+q.explain;ex.style.display='block'
+}
+
+// ─── ANSWER HANDLERS ──────────────────────────────────
+function checkMcq(idx){
+  if(answered)return;answered=true;clearInterval(timerInterval);stopSpeech();
+  const q=questions[current];const correct=idx===q.answer;if(correct)score++;
+  document.querySelectorAll('.opt').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===q.answer)b.classList.add(correct&&i===idx?'correct':'reveal');
+    if(i===idx&&!correct)b.classList.add('wrong')
+  });
+  showExplain(correct?'correct':'wrong',q);
+  results.push({q,userAnswer:idx,correct,timeout:false});
+  document.getElementById('next-btn').style.display='block'
+}
+function checkFill(){
+  if(answered)return;
+  const inp=document.getElementById('fill-inp');const val=inp.value.trim().toLowerCase();if(!val)return;
+  answered=true;clearInterval(timerInterval);
+  const q=questions[current];const correct=val===q.answer.toLowerCase();if(correct)score++;
+  inp.disabled=true;inp.className=correct?'correct':'wrong';
+  showExplain(correct?'correct':'wrong',q);
+  results.push({q,userAnswer:val,correct,timeout:false});
+  document.getElementById('next-btn').style.display='block'
+}
+function selectMatch(idx,side){
+  if(answered)return;
+  const q=questions[current];if(matchState.matched.includes(idx))return;
+  if(matchState.selected===null){
+    matchState.selected=idx;matchState.side=side;
+    document.getElementById((side==='left'?'l':'r')+idx).classList.add('selected')
+  }else{
+    if(matchState.side===side){
+      document.getElementById((matchState.side==='left'?'l':'r')+matchState.selected).classList.remove('selected');
+      matchState.selected=idx;matchState.side=side;
+      document.getElementById((side==='left'?'l':'r')+idx).classList.add('selected');return
+    }
+    const li=matchState.side==='left'?matchState.selected:idx;
+    const ri=matchState.side==='right'?matchState.selected:idx;
+    document.getElementById('l'+li).classList.remove('selected');
+    document.getElementById('r'+ri).classList.remove('selected');
+    const leftExpected=q.pairs[li].right;
+    const rightValue=q.pairs[ri].right;
+    if(leftExpected===rightValue){
+      document.getElementById('l'+li).classList.add('matched');
+      document.getElementById('r'+ri).classList.add('matched');
+      matchState.matched.push(li);
+      if(!matchState.usedRight)matchState.usedRight=[];
+      matchState.usedRight.push(ri);
+      if(matchState.matched.length===q.pairs.length){
+        score++;answered=true;clearInterval(timerInterval);
+        showExplain('correct',q);
+        results.push({q,userAnswer:'matched',correct:true,timeout:false});
+        document.getElementById('next-btn').style.display='block'
+      }
+    }else{
+      document.getElementById('l'+li).classList.add('wrong-sel');
+      document.getElementById('r'+ri).classList.add('wrong-sel');
+      setTimeout(()=>{document.getElementById('l'+li).classList.remove('wrong-sel');document.getElementById('r'+ri).classList.remove('wrong-sel')},700)
+    }
+    matchState.selected=null;matchState.side=null
+  }
+}
+
+function nextQ(){stopSpeech();currentAudioText='';current++;if(current>=questions.length){renderScore()}else{renderQ()}}
+
+// ─── RENDER: NAME ENTRY ───────────────────────────────
+function renderNameEntry(){
+  document.getElementById('app').innerHTML=`
+    <div class="name-wrap">
+      <h2>Welcome! 👋</h2>
+      <p>Enter your name to get started. Your scores will be saved for next time.</p>
+      <div class="name-input-row">
+        <input class="name-input" id="name-inp" type="text" placeholder="Your name..." maxlength="40" onkeydown="if(event.key==='Enter')submitName()">
+        <button class="name-btn" onclick="submitName()">Continue →</button>
+      </div>
+      <div class="name-error" id="name-error"></div>
+    </div>`;
+  setTimeout(()=>{const i=document.getElementById('name-inp');if(i)i.focus()},100);
+}
+
+function submitName(){
+  const inp=document.getElementById('name-inp');
+  const val=inp?inp.value.trim():'';
+  if(!val){
+    const err=document.getElementById('name-error');
+    if(err)err.textContent='Please enter your name.';
+    return;
+  }
+  currentUser=val;
+  if(val===ADMIN_NAME){ renderAdmin(); return; }
+  // Load previous attempt count for this user
+  const userData=loadUserData(val);
+  attemptNum=userData.attempts.length+1;
+  renderStart();
+}
+
+// ─── RENDER: START SCREEN ─────────────────────────────
+function renderStart(){
+  const userData=loadUserData(currentUser);
+  const prevAttempts=userData.attempts;
+  let historyHTML='';
+  if(prevAttempts.length>0){
+    const last=prevAttempts[prevAttempts.length-1];
+    const pct=Math.round((last.score/last.total)*100);
+    historyHTML=`<p style="color:var(--ink3);font-size:13px;margin-bottom:.25rem">Last attempt: <strong style="color:var(--ink)">${last.score}/${last.total}</strong> (${pct}%) · ${last.date}</p>`;
+  }
+  document.getElementById('app').innerHTML=`
+    <div class="start-wrap">
+      <h2>Ready to practise, <span class="welcome-name">${currentUser}</span>?</h2>
+      <p>This quiz covers all lessons from your English Club sessions.</p>
+      <p style="margin-top:4px">You have <strong>2 minutes</strong> per question · max <strong>~60 minutes</strong> total.</p>
+      ${historyHTML}
+      <div class="feature-list">
+        <span class="feature-tag">📝 Multiple choice</span>
+        <span class="feature-tag">✏️ Fill in the blank</span>
+        <span class="feature-tag">🔗 Matching</span>
+        <span class="feature-tag">🎧 Listening</span>
+        <span class="feature-tag">✅ True or False</span>
+        <span class="feature-tag">⏱ 2 min per question</span>
+        <span class="feature-tag">💡 Answer explanations</span>
+        <span class="feature-tag">📊 Score history</span>
+      </div>
+      <p style="color:var(--ink3);font-size:13px;margin-bottom:1.5rem">${questions.length} questions · Workplace · Problems · Personality · Jobs · Conversations</p>
+      <button class="start-btn" onclick="startQuiz()">Start Quiz →</button>
+    </div>`;
+}
+
+function startQuiz(){current=0;score=0;results=[];answered=false;renderQ()}
+
+// ─── RENDER: QUESTION ─────────────────────────────────
+function renderQ(){
+  answered=false;matchState={selected:null,side:null,matched:[],usedRight:[]};
+  const q=questions[current];
+  const pct=Math.round((current/questions.length)*100);
+  let body='';
+  if(q.type==='listen'){
+    currentAudioText = q.audio;
+    body+=`<div class="listen-block"><button class="play-btn" id="play-btn" onclick="togglePlay()">▶</button><div class="listen-info"><div class="listen-label">🎧 Listening exercise</div><div class="listen-hint">${q.audioLabel}</div></div></div>`;
+    body+=`<div class="options">`;
+    q.options.forEach((o,i)=>body+=`<button class="opt" onclick="checkMcq(${i})"><span class="opt-letter">${letters[i]}</span>${o}</button>`);
+    body+=`</div>`
+  }else if(q.type==='mcq'||q.type==='truefalse'){
+    body+=`<div class="options">`;
+    q.options.forEach((o,i)=>body+=`<button class="opt" onclick="checkMcq(${i})"><span class="opt-letter">${letters[i]}</span>${o}</button>`);
+    body+=`</div>`
+  }else if(q.type==='fill'){
+    body+=`<div class="fill-wrap"><input type="text" id="fill-inp" placeholder="Type your answer..." onkeydown="if(event.key==='Enter')checkFill()"><button class="check-btn" onclick="checkFill()">Check</button></div>`
+  }else if(q.type==='match'){
+    const rights=[...q.pairs.map((p,i)=>({text:p.right,idx:i}))].sort(()=>Math.random()-.5);
+    body+=`<div class="match-grid"><div class="match-col">`;
+    q.pairs.forEach((p,i)=>body+=`<div class="match-item" id="l${i}" onclick="selectMatch(${i},'left')">${p.left}</div>`);
+    body+=`</div><div class="match-col">`;
+    rights.forEach(r=>body+=`<div class="match-item" id="r${r.idx}" onclick="selectMatch(${r.idx},'right')">${r.text}</div>`);
+    body+=`</div></div>`
+  }
+  document.getElementById('app').innerHTML=`
+    <div class="progress-wrap">
+      <div class="progress-meta"><span>Question ${current+1} of ${questions.length}</span><span>${q.lesson}</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="timer-wrap">
+      <div class="timer-face">
+        <svg width="52" height="52" viewBox="0 0 52 52">
+          <circle class="bg" cx="26" cy="26" r="22"/>
+          <circle class="fg" id="timer-fg" cx="26" cy="26" r="22"/>
+        </svg>
+        <div class="timer-num" id="timer-num">2:00</div>
+      </div>
+      <div class="timer-bar-wrap">
+        <div class="timer-label">Time remaining</div>
+        <div class="timer-bar"><div class="timer-fill" id="timer-fill" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div class="q-card">
+      <div class="q-badge ${q.type}">${q.topic}</div>
+      <div class="q-text">${q.q}</div>
+      ${body}
+      <div id="explanation" class="explanation"></div>
+    </div>
+    <div class="nav-row">
+      <button class="next-btn" id="next-btn" onclick="nextQ()">${current+1<questions.length?'Next question →':'See results →'}</button>
+    </div>`;
+  startTimer()
+}
+
+// ─── RENDER: SCORE ────────────────────────────────────
+function renderScore(){
+  clearInterval(timerInterval);
+  const total=questions.length;
+  const pct=Math.round((score/total)*100);
+  const fillColor=pct>=80?'var(--accent)':pct>=60?'var(--warn)':'var(--danger)';
+  const msg=pct>=80?'Outstanding! 🎉':pct>=60?'Good effort! 👍':'Keep practising! 📚';
+
+  // Save to storage
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+now.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
+  const topicBreakdown={};
+  results.forEach(r=>{
+    if(!topicBreakdown[r.q.lesson])topicBreakdown[r.q.lesson]={correct:0,total:0};
+    topicBreakdown[r.q.lesson].total++;
+    if(r.correct)topicBreakdown[r.q.lesson].correct++;
+  });
+  const qResults=results.map((r,i)=>{
+    let userAnswerText='', correctAnswerText='';
+    if(r.q.type==='mcq'||r.q.type==='listen'||r.q.type==='truefalse'){
+      userAnswerText = r.timeout ? '(timeout)' : (r.q.options[r.userAnswer] || '');
+      correctAnswerText = r.q.options[r.q.answer] || '';
+    } else if(r.q.type==='fill'){
+      userAnswerText = r.timeout ? '(timeout)' : (r.userAnswer || '(blank)');
+      correctAnswerText = r.q.answer;
+    } else if(r.q.type==='match'){
+      userAnswerText = r.correct ? '(all matched)' : '(incomplete)';
+      correctAnswerText = '(all matched)';
+    }
+    return {qi:i,lesson:r.q.lesson,qText:r.q.q,correct:r.correct,timeout:r.timeout,userAnswerText,correctAnswerText};
+  });
+  const attemptData={score,total,pct,date:dateStr,attempt:attemptNum,topics:topicBreakdown,qResults};
+  saveAttempt(currentUser,attemptData);
+
+  // Compare with previous
+  const userData=loadUserData(currentUser);
+  const allAttempts=userData.attempts;
+  let compareHTML='';
+  if(allAttempts.length>=2){
+    const prev=allAttempts[allAttempts.length-2];
+    const diff=pct-prev.pct;
+    const c1=diff>0?'better':diff<0?'worse':'';
+    const c2=diff<0?'better':diff>0?'worse':'';
+    const arrow=diff>0?'↑ +'+diff+'%':diff<0?'↓ '+diff+'%':'→ Same';
+    compareHTML=`<div class="compare-block" id="compare-block">
+      <h3>Score comparison</h3>
+      <div class="compare-row">
+        <div class="compare-item ${c2}"><div class="ci-label">Attempt ${prev.attempt}</div><div class="ci-val">${prev.score}/${prev.total}</div><div class="ci-sub">${prev.pct}%</div></div>
+        <div class="compare-item ${c1}"><div class="ci-label">This attempt (${attemptNum})</div><div class="ci-val">${score}/${total}</div><div class="ci-sub">${pct}% — ${arrow}</div></div>
+      </div>
+    </div>`
+  }
+
+  let reviewHTML='<div class="review-section"><h3>Review your answers</h3>';
+  results.forEach((r,i)=>{
+    const status=r.timeout?'timeout':r.correct?'correct':'wrong';
+    const icon=r.timeout?'⏱':r.correct?'✓':'✗';
+    let answerText='';
+    if(r.q.type==='mcq'||r.q.type==='listen'||r.q.type==='truefalse'){
+      answerText=r.timeout?`<div class="ri-answer">⏱ Time's up — Correct answer: <strong>${r.q.options[r.q.answer]}</strong></div>`:
+        r.correct?`<div class="ri-answer">✓ Your answer: <strong>${r.q.options[r.userAnswer]}</strong></div>`:
+        `<div class="ri-answer">✗ Your answer: <strong>${r.q.options[r.userAnswer]}</strong><br>Correct answer: <strong>${r.q.options[r.q.answer]}</strong></div>`
+    }else if(r.q.type==='fill'){
+      answerText=r.timeout?`<div class="ri-answer">⏱ Time's up — Correct answer: <strong>${r.q.answer}</strong></div>`:
+        r.correct?`<div class="ri-answer">✓ Your answer: <strong>${r.userAnswer}</strong></div>`:
+        `<div class="ri-answer">✗ Your answer: <strong>${r.userAnswer||'(blank)'}</strong> — Correct: <strong>${r.q.answer}</strong></div>`
+    }else if(r.q.type==='match'){
+      answerText=r.correct?`<div class="ri-answer">✓ All pairs matched correctly!</div>`:`<div class="ri-answer">✗ Not all pairs matched.</div>`
+    }
+    reviewHTML+=`<div class="review-item">
+      <div class="ri-meta"><span class="ri-status ${status}">${icon}</span><span class="ri-qnum">Q${i+1}</span><span class="ri-lesson">${r.q.lesson}</span></div>
+      <div class="ri-q">${r.q.q}</div>
+      ${answerText}
+      <div class="ri-explain ${status}">${r.q.explain}</div>
+    </div>`
+  });
+  reviewHTML+='</div>';
+
+  document.getElementById('app').innerHTML=`
+    <div class="score-wrap">
+      <div class="score-header">
+        <div class="score-big">${score}<span style="font-size:2rem;color:var(--ink2)">/${total}</span></div>
+        <div class="score-pct">${pct}% correct — ${msg}</div>
+        <div class="score-bar"><div class="score-fill" id="score-fill" style="width:0%;background:${fillColor}"></div></div>
+      </div>
+      ${compareHTML}
+      <div class="score-actions">
+        <button class="btn-primary" onclick="retryQuiz()">Try again →</button>
+        <button class="btn-secondary" onclick="renderNameEntry()">Change name</button>
+      </div>
+    </div>
+    ${reviewHTML}`;
+  setTimeout(()=>{
+    const sf=document.getElementById('score-fill');if(sf)sf.style.width=pct+'%';
+    const cb=document.getElementById('compare-block');if(cb)cb.style.display='block';
+  },100);
+  attemptNum++;
+}
+
+function retryQuiz(){current=0;score=0;results=[];answered=false;renderQ()}
+
+// ─── ADMIN: analyse question performance across attempts ──
+function analyseQuestions(attempts){
+  const map={};
+  attempts.forEach(a=>{
+    if(!a.qResults) return;
+    a.qResults.forEach(r=>{
+      if(!map[r.qi]) map[r.qi]={qText:r.qText,lesson:r.lesson,appeared:0,wrong:0,timeout:0,history:[],wrongAnswers:[]};
+      map[r.qi].appeared++;
+      if(r.timeout){
+        map[r.qi].timeout++;
+        map[r.qi].history.push(false);
+        map[r.qi].wrongAnswers.push({attempt:a.attempt,date:a.date,chosen:'(timeout)',correct:r.correctAnswerText||''});
+      } else if(!r.correct){
+        map[r.qi].wrong++;
+        map[r.qi].history.push(false);
+        map[r.qi].wrongAnswers.push({attempt:a.attempt,date:a.date,chosen:r.userAnswerText||'?',correct:r.correctAnswerText||''});
+      } else {
+        map[r.qi].history.push(true);
+      }
+    });
+  });
+  const persistent=[], fixed=[], struggling=[];
+  Object.values(map).forEach(q=>{
+    const totalFail=q.wrong+q.timeout;
+    if(totalFail===0) return;
+    const lastResult=q.history[q.history.length-1];
+    const prevFailed=q.history.slice(0,-1).some(c=>!c);
+    if(totalFail>=2) persistent.push({...q,totalFail});
+    else if(!lastResult) struggling.push({...q,totalFail});
+    if(prevFailed && lastResult) fixed.push({...q,totalFail});
+  });
+  persistent.sort((a,b)=>b.totalFail-a.totalFail);
+  return {persistent,fixed,struggling};
+}
+
+// ─── RENDER: ADMIN DASHBOARD ──────────────────────────
+function renderAdmin(){
+  const users=getAllUsers();
+  const totalUsers=users.length;
+  const totalAttempts=users.reduce((s,u)=>s+u.attempts.length,0);
+  const avgScore=totalAttempts===0?'-':Math.round(users.reduce((s,u)=>s+u.attempts.reduce((a,t)=>a+t.pct,0),0)/totalAttempts)+'%';
+
+  let tableRows='';
+  if(users.length===0){
+    tableRows=`<tr><td colspan="5" class="admin-empty">No quiz attempts yet. Share the link with your team!</td></tr>`;
+  } else {
+    users.forEach((u,uidx)=>{
+      const best=u.attempts.reduce((b,a)=>a.pct>b.pct?a:b,u.attempts[0]);
+      const last=u.attempts[u.attempts.length-1];
+      const pillClass=last.pct>=80?'high':last.pct>=60?'mid':'low';
+
+      // Topic breakdown pills
+      let topicHTML='<div class="topic-pills">';
+      if(best.topics){
+        Object.entries(best.topics).forEach(([t,v])=>{
+          const tp=Math.round((v.correct/v.total)*100);
+          const tc=tp>=80?'#D8F3DC;color:#1B4332':tp>=60?'#FFF0E4;color:#7C3A0A':'#FFE8E8;color:#C1121F';
+          topicHTML+=`<span class="topic-pill" style="background:${tc.split(';')[0].split(':')[1]};color:${tc.split(';')[1].split(':')[1]}">${t}: ${tp}%</span>`;
+        });
+      }
+      topicHTML+='</div>';
+
+      // Question analysis (only if >1 attempt with qResults)
+      const attemptsWithData=u.attempts.filter(a=>a.qResults&&a.qResults.length>0);
+      let qAnalysisHTML='';
+      if(attemptsWithData.length>=1){
+        const {persistent,fixed,struggling}=analyseQuestions(attemptsWithData);
+        if(persistent.length>0){
+          qAnalysisHTML+=`<div class="qa-section-title qa-danger">🔴 Consistently wrong (failed ≥ 2 times)</div>`;
+          persistent.forEach(q=>{
+            const dots=q.history.map(c=>`<span class="dot ${c?'dot-ok':'dot-fail'}" title="${c?'Correct':'Wrong'}"></span>`).join('');
+            const wrongList=q.wrongAnswers.map(w=>`<div class="qa-wrong-row"><span class="qa-wrong-attempt">Attempt ${w.attempt}</span><span class="qa-chosen">Chose: <strong>${w.chosen}</strong></span>${w.chosen!==w.correct&&w.chosen!=='(timeout)'?`<span class="qa-correct-ans">✓ ${w.correct}</span>`:''}</div>`).join('');
+            qAnalysisHTML+=`<div class="qa-item qa-item-danger">
+              <div class="qa-meta"><span class="qa-lesson">${q.lesson}</span><span class="qa-fails">✗ ${q.totalFail}/${q.appeared} attempts</span></div>
+              <div class="qa-q">${q.qText}</div>
+              <div class="qa-dots">${dots}</div>
+              ${wrongList?`<div class="qa-wrong-list">${wrongList}</div>`:''}
+            </div>`;
+          });
+        }
+        if(struggling.length>0&&attemptsWithData.length===1){
+          qAnalysisHTML+=`<div class="qa-section-title qa-warn">🟡 Missed in first attempt — watch closely</div>`;
+          struggling.forEach(q=>{
+            const wrongList=q.wrongAnswers.map(w=>`<div class="qa-wrong-row"><span class="qa-wrong-attempt">Attempt ${w.attempt}</span><span class="qa-chosen">Chose: <strong>${w.chosen}</strong></span>${w.chosen!==w.correct&&w.chosen!=='(timeout)'?`<span class="qa-correct-ans">✓ ${w.correct}</span>`:''}</div>`).join('');
+            qAnalysisHTML+=`<div class="qa-item qa-item-warn">
+              <div class="qa-meta"><span class="qa-lesson">${q.lesson}</span><span class="qa-fails" style="color:var(--warn)">✗ 1/${q.appeared} attempt</span></div>
+              <div class="qa-q">${q.qText}</div>
+              ${wrongList?`<div class="qa-wrong-list">${wrongList}</div>`:''}
+            </div>`;
+          });
+        }
+        if(fixed.length>0){
+          qAnalysisHTML+=`<div class="qa-section-title qa-ok">🟢 Fixed — was wrong, now correct</div>`;
+          fixed.forEach(q=>{
+            const dots=q.history.map(c=>`<span class="dot ${c?'dot-ok':'dot-fail'}"></span>`).join('');
+            qAnalysisHTML+=`<div class="qa-item qa-item-ok">
+              <div class="qa-meta"><span class="qa-lesson">${q.lesson}</span><span class="qa-fails" style="color:var(--accent)">✓ fixed after ${q.totalFail} mistake${q.totalFail>1?'s':''}</span></div>
+              <div class="qa-q">${q.qText}</div>
+              <div class="qa-dots">${dots}</div>
+            </div>`;
+          });
+        }
+        if(!qAnalysisHTML) qAnalysisHTML=`<div style="font-size:13px;color:var(--ink3);padding:.5rem 0">No problem patterns yet — keep collecting data!</div>`;
+      } else {
+        qAnalysisHTML=`<div style="font-size:13px;color:var(--ink3);padding:.5rem 0">Detailed question tracking available after first full attempt.</div>`;
+      }
+
+      tableRows+=`<tr>
+        <td><strong>${u.name}</strong></td>
+        <td><span class="score-pill ${pillClass}">${last.score}/${last.total} (${last.pct}%)</span></td>
+        <td><span class="score-pill high">${best.score}/${best.total} (${best.pct}%)</span></td>
+        <td>${u.attempts.length}</td>
+        <td><button class="expand-btn" id="expbtn-${uidx}" onclick="toggleDetail(${uidx})">Details ▾</button></td>
+      </tr>
+      <tr class="detail-row" id="detail-${uidx}">
+        <td colspan="5">
+          <div class="detail-inner">
+
+            <div class="detail-col">
+              <div class="detail-section-title">📅 Attempt history</div>
+              <div class="detail-attempts">
+                ${u.attempts.map(a=>{
+                  const pc=a.pct>=80?'high':a.pct>=60?'mid':'low';
+                  return `<div class="attempt-item">
+                    <div><strong>Attempt ${a.attempt}</strong><span class="attempt-date">${a.date}</span></div>
+                    <span class="score-pill ${pc}">${a.score}/${a.total} — ${a.pct}%</span>
+                  </div>`;
+                }).join('')}
+              </div>
+              <div class="detail-section-title" style="margin-top:12px">📊 Best attempt — by topic</div>
+              ${topicHTML}
+            </div>
+
+            <div class="detail-col">
+              <div class="detail-section-title">🔍 Question analysis</div>
+              ${qAnalysisHTML}
+            </div>
+
+          </div>
+        </td>
+      </tr>`;
+    });
+  }
+
+  document.getElementById('app').innerHTML=`
+    <div class="admin-wrap">
+      <div class="admin-header">
+        <h2>Admin Dashboard</h2>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="admin-badge">🔒 Admin</span>
+          <button class="admin-logout" onclick="renderNameEntry()">← Exit</button>
+        </div>
+      </div>
+      <div class="admin-stats">
+        <div class="stat-box"><div class="stat-val">${totalUsers}</div><div class="stat-label">Participants</div></div>
+        <div class="stat-box"><div class="stat-val">${totalAttempts}</div><div class="stat-label">Total attempts</div></div>
+        <div class="stat-box"><div class="stat-val">${avgScore}</div><div class="stat-label">Avg score</div></div>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Latest score</th>
+              <th>Best score</th>
+              <th>Attempts</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function toggleDetail(idx){
+  const row=document.getElementById('detail-'+idx);
+  const btn=document.getElementById('expbtn-'+idx);
+  if(!row)return;
+  const shown=row.style.display==='table-row';
+  row.style.display=shown?'none':'table-row';
+  if(btn)btn.textContent=shown?'Details ▾':'Details ▴';
+}
+
+// ─── INIT ─────────────────────────────────────────────
+// Pre-load voices
+if(speechSynth.onvoiceschanged!==undefined){
+  speechSynth.onvoiceschanged=()=>speechSynth.getVoices();
+}
+renderNameEntry();
+</script>
+</body>
+</html>
